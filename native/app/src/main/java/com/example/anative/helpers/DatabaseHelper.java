@@ -375,4 +375,35 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.close();
         }
     }
+    public ArrayList<Project> searchProjects(String query) {
+        ArrayList<Project> list = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String selection = COLUMN_PROJECT_NAME + " LIKE ? OR " + COLUMN_PROJECT_DES + " LIKE ?";
+        String[] selectionArgs = new String[]{"%" + query + "%", "%" + query + "%"};
+
+        Cursor cursor = db.query(TABLE_PROJECTS, null, selection, selectionArgs, null, null, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                Project project = new Project(
+                        cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_PROJECT_ID)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PROJECT_CODE)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PROJECT_NAME)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PROJECT_DES)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_START_DATE)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_END_DATE)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PROJECT_OWNER)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PROJECT_STATUS)),
+                        cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_PROJECT_BUDGET)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_SPECIAL_REQUIREMENT)),
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DEPT_INFO))
+                );
+                list.add(project);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        db.close();
+        return list;
+    }
 }

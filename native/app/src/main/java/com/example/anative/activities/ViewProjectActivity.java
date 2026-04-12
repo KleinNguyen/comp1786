@@ -2,6 +2,7 @@ package com.example.anative.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.SearchView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,6 +28,7 @@ public class ViewProjectActivity extends AppCompatActivity {
     private FloatingActionButton fabAdd;
     private TabLayout projectTab;
     private DatabaseHelper dbHelper;
+    private SearchView searchProject;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +41,7 @@ public class ViewProjectActivity extends AppCompatActivity {
         setupClickListeners();
         setupWindowInsets();
         setupTabLayout();
+        setupSearchView();
     }
     private void setupUI(){
         recyclerView = findViewById(R.id.projectRecycle);
@@ -53,6 +56,7 @@ public class ViewProjectActivity extends AppCompatActivity {
         recyclerView.setAdapter(projectAdapter);
         fabAdd = findViewById(R.id.fabAddProject);
         projectTab = findViewById(R.id.projectTab);
+        searchProject = findViewById(R.id.searchProject);
     }
     private void navigateToAddProject(){
         Intent intent = new Intent(this, AddProjectActivity.class);
@@ -94,6 +98,39 @@ public class ViewProjectActivity extends AppCompatActivity {
         }
         projectAdapter.notifyDataSetChanged();
 
+    }
+    private void setupSearchView() {
+        searchProject.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                performSearch(query);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                performSearch(newText);
+                return true;
+            }
+        });
+    }
+    private void performSearch(String query) {
+        projectsList.clear();
+        ArrayList<Project> filteredProjects;
+
+        if (query.isEmpty()) {
+            String currentStatus = "All Project";
+            if (projectTab != null && projectTab.getTabAt(projectTab.getSelectedTabPosition()) != null) {
+                currentStatus = projectTab.getTabAt(projectTab.getSelectedTabPosition()).getText().toString();
+            }
+            loadProject(currentStatus);
+        } else {
+            filteredProjects = dbHelper.searchProjects(query);
+            if (filteredProjects != null) {
+                projectsList.addAll(filteredProjects);
+            }
+            projectAdapter.notifyDataSetChanged();
+        }
     }
     private void setupWindowInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.project_activity), (v, insets) -> {
