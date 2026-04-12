@@ -16,6 +16,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.anative.R;
 import com.example.anative.helpers.DatabaseHelper;
+import com.example.anative.helpers.ValidationHelper;
 import com.example.anative.models.Project;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -107,34 +108,37 @@ public class EditProjectActivity extends AppCompatActivity {
     }
 
     private void updateProject() {
+        String code = editProjectCode.getText().toString().trim();
         String name = editProjectName.getText().toString().trim();
+        String des = editProjectDes.getText().toString().trim();
+        String start = editStartDate.getText().toString().trim();
+        String end = editEndDate.getText().toString().trim();
+        String owner = editProjectOwner.getText().toString().trim();
+        String status = dropStatus.getText().toString().trim();
         String budgetStr = editProjectBudget.getText().toString().trim();
 
-        if (name.isEmpty() || budgetStr.isEmpty()) {
-            Toast.makeText(this, "Please fill required fields", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        if (ValidationHelper.validateProjectInput(this, code, name, des, start, end, owner, status, budgetStr)) {
+            Project updatedProject = new Project(
+                    projectId,
+                    code,
+                    name,
+                    des,
+                    start,
+                    end,
+                    owner,
+                    status,
+                    Double.parseDouble(budgetStr),
+                    editSpecialRequirement.getText().toString(),
+                    editDepartmentInformation.getText().toString()
+            );
 
-        Project updatedProject = new Project(
-                projectId,
-                editProjectCode.getText().toString(),
-                name,
-                editProjectDes.getText().toString(),
-                editStartDate.getText().toString(),
-                editEndDate.getText().toString(),
-                editProjectOwner.getText().toString(),
-                dropStatus.getText().toString(),
-                Double.parseDouble(budgetStr),
-                editSpecialRequirement.getText().toString(),
-                editDepartmentInformation.getText().toString()
-        );
-
-        boolean success = dbHelper.updateProject(updatedProject);
-        if (success) {
-            Toast.makeText(this, "Project updated!", Toast.LENGTH_SHORT).show();
-            finish();
-        } else {
-            Toast.makeText(this, "Update failed!", Toast.LENGTH_SHORT).show();
+            boolean success = dbHelper.updateProject(updatedProject);
+            if (success) {
+                Toast.makeText(this, "Project updated!", Toast.LENGTH_SHORT).show();
+                finish();
+            } else {
+                Toast.makeText(this, "Update failed!", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 }

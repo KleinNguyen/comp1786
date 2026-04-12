@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.anative.R;
 import com.example.anative.helpers.DatabaseHelper;
+import com.example.anative.helpers.ValidationHelper;
 import com.example.anative.models.Expense;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -124,28 +125,25 @@ public class EditExpenseActivity extends AppCompatActivity {
         String location = editExpenseLocation.getText().toString().trim();
         String description = editExpenseDescription.getText().toString().trim();
 
-        if (code.isEmpty() || amountStr.isEmpty()) {
-            Toast.makeText(this, "Please fill Code and Amount", Toast.LENGTH_SHORT).show();
-            return;
-        }
+        if (ValidationHelper.validateExpenseInput(this, date, amountStr, currency, type, method, claimant, status)) {
+            currentExpense.setExpenseCode(code);
+            currentExpense.setDate(date);
+            currentExpense.setAmount(Double.parseDouble(amountStr));
+            currentExpense.setCurrency(currency);
+            currentExpense.setType(type);
+            currentExpense.setPaymentMethod(method);
+            currentExpense.setClaimant(claimant);
+            currentExpense.setPaymentStatus(status);
+            currentExpense.setLocation(location);
+            currentExpense.setDescription(description);
 
-        currentExpense.setExpenseCode(code);
-        currentExpense.setDate(date);
-        currentExpense.setAmount(Double.parseDouble(amountStr));
-        currentExpense.setCurrency(currency);
-        currentExpense.setType(type);
-        currentExpense.setPaymentMethod(method);
-        currentExpense.setClaimant(claimant);
-        currentExpense.setPaymentStatus(status);
-        currentExpense.setLocation(location);
-        currentExpense.setDescription(description);
-
-        int rows = dbHelper.updateExpense(currentExpense);
-        if (rows > 0) {
-            Toast.makeText(this, "Expense updated successfully", Toast.LENGTH_SHORT).show();
-            finish();
-        } else {
-            Toast.makeText(this, "Update failed", Toast.LENGTH_SHORT).show();
+            int rows = dbHelper.updateExpense(currentExpense);
+            if (rows > 0) {
+                Toast.makeText(this, "Expense updated successfully", Toast.LENGTH_SHORT).show();
+                finish();
+            } else {
+                Toast.makeText(this, "Update failed", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 }

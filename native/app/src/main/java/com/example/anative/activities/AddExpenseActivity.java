@@ -16,6 +16,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.anative.R;
 import com.example.anative.helpers.DatabaseHelper;
+import com.example.anative.helpers.ValidationHelper;
 import com.example.anative.models.Expense;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -105,29 +106,34 @@ public class AddExpenseActivity extends AppCompatActivity {
         String code = editExpenseId.getText().toString().trim();
         String date = editExpenseDate.getText().toString().trim();
         String amountStr = editExpenseAmount.getText().toString().trim();
+        String currency = editCurrency.getText().toString().trim();
+        String type = dropExpenseType.getText().toString().trim();
+        String method = dropPaymentMethod.getText().toString().trim();
         String claimant = editExpenseClaimant.getText().toString().trim();
+        String status = dropPaymentStatus.getText().toString().trim();
 
+        if (ValidationHelper.validateExpenseInput(this, date, amountStr, currency, type, method, claimant, status)) {
+            Expense expense = new Expense(
+                    0,
+                    projectId,
+                    code,
+                    date,
+                    Double.parseDouble(amountStr),
+                    currency,
+                    type,
+                    method,
+                    claimant,
+                    status,
+                    editExpenseDescription.getText().toString(),
+                    editExpenseLocation.getText().toString()
+            );
 
-        Expense expense = new Expense(
-                0,
-                projectId,
-                code,
-                date,
-                Double.parseDouble(amountStr),
-                editCurrency.getText().toString(),
-                dropExpenseType.getText().toString(),
-                dropPaymentMethod.getText().toString(),
-                claimant,
-                dropPaymentStatus.getText().toString(),
-                editExpenseDescription.getText().toString(),
-                editExpenseLocation.getText().toString()
-        );
-
-        if (dbHelper.addExpense(expense) != -1) {
-            Toast.makeText(this, "Expense added successfully", Toast.LENGTH_SHORT).show();
-            finish();
-        } else {
-            Toast.makeText(this, "Failed to add expense (Check unique ID)", Toast.LENGTH_SHORT).show();
+            if (dbHelper.addExpense(expense) != -1) {
+                Toast.makeText(this, "Expense added successfully", Toast.LENGTH_SHORT).show();
+                finish();
+            } else {
+                Toast.makeText(this, "Failed to add expense (Check unique ID)", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 }

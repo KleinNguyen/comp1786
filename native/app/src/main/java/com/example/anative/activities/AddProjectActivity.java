@@ -17,6 +17,7 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.example.anative.R;
 import com.example.anative.helpers.DatabaseHelper;
+import com.example.anative.helpers.ValidationHelper;
 import com.example.anative.models.Project;
 
 import java.util.Calendar;
@@ -98,16 +99,16 @@ public class AddProjectActivity extends AppCompatActivity {
         String special = editSpecialRequirement.getText().toString().trim();
         String dept = editDepartmentInformation.getText().toString().trim();
 
-        double budget = Double.parseDouble(budgetStr);
+        if (ValidationHelper.validateProjectInput(this, code, name, des, start, end, owner, status, budgetStr)) {
+            Project project = new Project(0, code, name, des, start, end, owner, status, Double.parseDouble(budgetStr), special, dept);
 
-        Project project = new Project(0, code, name, des, start, end, owner, status, budget, special, dept);
-
-        long result = dbHelper.addProject(project);
-        if (result != -1) {
-            Toast.makeText(this, "Project added successfully!", Toast.LENGTH_SHORT).show();
-            finish();
-        } else {
-            Toast.makeText(this, "Failed to add project. Code might be duplicated.", Toast.LENGTH_SHORT).show();
+            long result = dbHelper.addProject(project);
+            if (result != -1) {
+                Toast.makeText(this, "Project added successfully!", Toast.LENGTH_SHORT).show();
+                finish();
+            } else {
+                Toast.makeText(this, "Failed to add project. Code might be duplicated.", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
