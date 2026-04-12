@@ -3,6 +3,7 @@ package com.example.anative.models;
 public class Expense {
     private long id;
     private long projectId;
+    private String expenseCode;
     private String date;
     private double amount;
     private String currency;
@@ -15,10 +16,11 @@ public class Expense {
 
     public Expense() {}
 
-    public Expense(long id, long projectId, String date, double amount, String currency,
+    public Expense(long id, long projectId, String expenseCode, String date, double amount, String currency,
                    String type, String paymentMethod, String claimant, String paymentStatus,
                    String description, String location) {
         this.id = id;
+        this.expenseCode = expenseCode;
         this.projectId = projectId;
         this.date = date;
         this.amount = amount;
@@ -31,9 +33,10 @@ public class Expense {
         this.location = location;
     }
 
-    public Expense(long projectId, String date, double amount, String currency,
+    public Expense(long projectId, String expenseCode, String date, double amount, String currency,
                    String type, String paymentMethod, String claimant, String paymentStatus,
                    String description, String location) {
+        this.expenseCode = expenseCode;
         this.projectId = projectId;
         this.date = date;
         this.amount = amount;
@@ -49,6 +52,8 @@ public class Expense {
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
 
+    public String getExpenseCode() { return expenseCode; }
+    public void setExpenseCode(String expenseCode) { this.expenseCode = expenseCode; }
     public long getProjectId() { return projectId; }
     public void setProjectId(long projectId) { this.projectId = projectId; }
 

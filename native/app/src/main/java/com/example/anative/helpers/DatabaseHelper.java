@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.nfc.Tag;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -13,6 +14,7 @@ import androidx.annotation.Nullable;
 import com.example.anative.models.Project;
 import com.example.anative.models.Expense;
 
+import java.lang.annotation.Target;
 import java.util.ArrayList;
 
 
@@ -48,7 +50,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_PAYMENT_STATUS = "payment_status";
     private static final String COLUMN_EXPENSE_DES = "expense_des";
     private static final String COLUMN_EXPENSE_LOCATION = "expense_location";
-    public DatabaseHelper(@Nullable Context context, @Nullable String name, @Nullable SQLiteDatabase.CursorFactory factory, int version) {
+    public DatabaseHelper(@Nullable Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
@@ -134,7 +136,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             cursor = db.query(TABLE_PROJECTS, null, null, null, null, null, COLUMN_PROJECT_ID + " DESC");
             if (cursor != null && cursor.moveToFirst()) {
                 do {
-                    projects.add(new Project());
+                    long id = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_PROJECT_ID));
+                    String code = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PROJECT_CODE));
+                    String name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PROJECT_NAME));
+                    String des = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PROJECT_DES));
+                    String start = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_START_DATE));
+                    String end = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_END_DATE));
+                    String owner = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PROJECT_OWNER));
+                    String status = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PROJECT_STATUS));
+                    double budget = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_PROJECT_BUDGET));
+                    String req = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_SPECIAL_REQUIREMENT));
+                    String dept = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DEPT_INFO));
+
+                    projects.add(new Project(id, code, name, des, start, end, owner, status, budget, req, dept));
                 } while (cursor.moveToNext());
             }
         } finally {
@@ -142,5 +156,182 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             db.close();
         }
         return projects;
+    }
+    public int updateProject(Project project){
+        if(project == null){
+            Log.e(TAG, "Cannot update null project");
+            return 0;
+        }
+        SQLiteDatabase db = this.getWritableDatabase();
+        int rows = 0;
+        try{
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_PROJECT_CODE, project.getProjectCode());
+            values.put(COLUMN_PROJECT_NAME, project.getProjectName());
+            values.put(COLUMN_PROJECT_DES, project.getProjectDescription());
+            values.put(COLUMN_START_DATE, project.getStartDate());
+            values.put(COLUMN_END_DATE, project.getEndDate());
+            values.put(COLUMN_PROJECT_OWNER, project.getProjectOwner());
+            values.put(COLUMN_PROJECT_STATUS, project.getProjectStatus());
+            values.put(COLUMN_PROJECT_BUDGET, project.getProjectBudget());
+            values.put(COLUMN_SPECIAL_REQUIREMENT, project.getSpecialRequirement());
+            values.put(COLUMN_DEPT_INFO, project.getDepartmentInformation());
+            rows = db.update(TABLE_PROJECTS, values, COLUMN_PROJECT_ID + "=?", new String[]{String.valueOf(project.getId())});
+            if(rows > 0){
+                Log.d(TAG, "Successful updated project: " + project.getProjectName());
+            } else {
+                Log.w(TAG, "No rows updated for project: " + project.getProjectName());
+            }
+        } catch (SQLException e){
+            Log.e(TAG, "Error updating project", e);
+        } finally {
+            db.close();
+        }
+        return rows;
+    }
+    public void deleteProject(Project project, long id){
+        if(id <= 0){
+            Log.e(TAG, "Invalid project ID for deletion: " + id);
+            return;
+        }
+        SQLiteDatabase db = this.getWritableDatabase();
+        try{
+            int rows = db.delete(TABLE_PROJECTS, COLUMN_PROJECT_ID + "=?", new String[] { String.valueOf(id) });
+            if(rows > 0){
+                Log.d(TAG, "Successfully deleted project with name" + project.getProjectName());
+            } else{
+                Log.w(TAG, "No project found with ID: " + id);
+            }
+        } catch (SQLException e){
+            Log.e(TAG, "Error deleting project with ID: " + id, e);
+        } finally {
+            db.close();
+        }
+    }
+
+    public long addExpense(Expense expense) {
+        if (expense == null) {
+            Log.e(TAG, "Cannot add null expense");
+            return -1;
+        }
+        SQLiteDatabase db = this.getWritableDatabase();
+        long id = -1;
+        try {
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_FK_PROJECT_ID, expense.getProjectId());
+            values.put(COLUMN_EXPENSE_CODE, expense.getExpenseCode());
+            values.put(COLUMN_EXPENSE_DATE, expense.getDate());
+            values.put(COLUMN_EXPENSE_CURRENCY, expense.getCurrency());
+            values.put(COLUMN_EXPENSE_AMOUNT, expense.getAmount());
+            values.put(COLUMN_EXPENSE_TYPE, expense.getType());
+            values.put(COLUMN_PAYMENT_METHOD, expense.getPaymentMethod());
+            values.put(COLUMN_CLAIMANT, expense.getClaimant());
+            values.put(COLUMN_PAYMENT_STATUS, expense.getPaymentStatus());
+            values.put(COLUMN_EXPENSE_DES, expense.getDescription());
+            values.put(COLUMN_EXPENSE_LOCATION, expense.getLocation());
+
+            id = db.insert(TABLE_EXPENSES, null, values);
+            if (id == -1) {
+                Log.e(TAG, "Failed to insert expense");
+            } else {
+                Log.d(TAG, "Successful added expense with ID: " + id);
+            }
+        } catch (SQLException e) {
+            Log.e(TAG, "Error adding expense", e);
+        } finally {
+            db.close();
+        }
+        return id;
+    }
+
+    public ArrayList<Expense> getExpensesByProject(long projectId) {
+        ArrayList<Expense> expenses = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(TABLE_EXPENSES, null, COLUMN_FK_PROJECT_ID + "=?",
+                    new String[]{String.valueOf(projectId)}, null, null, COLUMN_EXPENSE_ID + " DESC");
+
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    long id = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_EXPENSE_ID));
+                    long pId = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_FK_PROJECT_ID));
+                    String code = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EXPENSE_CODE));
+                    String date = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EXPENSE_DATE));
+                    String currency = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EXPENSE_CURRENCY));
+                    double amount = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_EXPENSE_AMOUNT));
+                    String type = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EXPENSE_TYPE));
+                    String method = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PAYMENT_METHOD));
+                    String claimant = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CLAIMANT));
+                    String status = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PAYMENT_STATUS));
+                    String des = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EXPENSE_DES));
+                    String loc = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EXPENSE_LOCATION));
+
+                    expenses.add(new Expense(id, pId, code, date, amount, currency,  type, method, claimant, status, des, loc));
+                } while (cursor.moveToNext());
+            }
+        } finally {
+            if (cursor != null) cursor.close();
+            db.close();
+        }
+        return expenses;
+    }
+
+    public int updateExpense(Expense expense) {
+        if (expense == null) {
+            Log.e(TAG, "Cannot update null expense");
+            return 0;
+        }
+        SQLiteDatabase db = this.getWritableDatabase();
+        int rows = 0;
+        try {
+            ContentValues values = new ContentValues();
+            values.put(COLUMN_FK_PROJECT_ID, expense.getProjectId());
+            values.put(COLUMN_EXPENSE_CODE, expense.getExpenseCode());
+            values.put(COLUMN_EXPENSE_DATE, expense.getDate());
+            values.put(COLUMN_EXPENSE_CURRENCY, expense.getCurrency());
+            values.put(COLUMN_EXPENSE_AMOUNT, expense.getAmount());
+            values.put(COLUMN_EXPENSE_TYPE, expense.getType());
+            values.put(COLUMN_PAYMENT_METHOD, expense.getPaymentMethod());
+            values.put(COLUMN_CLAIMANT, expense.getClaimant());
+            values.put(COLUMN_PAYMENT_STATUS, expense.getPaymentStatus());
+            values.put(COLUMN_EXPENSE_DES, expense.getDescription());
+            values.put(COLUMN_EXPENSE_LOCATION, expense.getLocation());
+
+            rows = db.update(TABLE_EXPENSES, values, COLUMN_EXPENSE_ID + "=?",
+                    new String[]{String.valueOf(expense.getId())});
+
+            if (rows > 0) {
+                Log.d(TAG, "Successful updated expense ID: " + expense.getId());
+            } else {
+                Log.w(TAG, "No rows updated for expense ID: " + expense.getId());
+            }
+        } catch (SQLException e) {
+            Log.e(TAG, "Error updating expense", e);
+        } finally {
+            db.close();
+        }
+        return rows;
+    }
+
+    public void deleteExpense(long id) {
+        if (id <= 0) {
+            Log.e(TAG, "Invalid expense ID for deletion: " + id);
+            return;
+        }
+        SQLiteDatabase db = this.getWritableDatabase();
+        try {
+            int rows = db.delete(TABLE_EXPENSES, COLUMN_EXPENSE_ID + "=?",
+                    new String[]{String.valueOf(id)});
+            if (rows > 0) {
+                Log.d(TAG, "Successfully deleted expense with ID: " + id);
+            } else {
+                Log.w(TAG, "No expense found with ID: " + id);
+            }
+        } catch (SQLException e) {
+            Log.e(TAG, "Error deleting expense with ID: " + id, e);
+        } finally {
+            db.close();
+        }
     }
 }
