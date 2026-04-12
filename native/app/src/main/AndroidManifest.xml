@@ -24,6 +24,9 @@
             android:name=".activities.ProjectDetailActivity"
             android:exported="false" />
         <activity
+            android:name=".activities.ExpenseDetailActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.AddExpenseActivity"
             android:exported="false" />
         <activity

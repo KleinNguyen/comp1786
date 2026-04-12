@@ -16,9 +16,12 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.anative.adapters.ExpenseAdapter;
 import com.example.anative.helpers.DatabaseHelper;
 import com.example.anative.R;
 import com.example.anative.models.Project;
+import com.example.anative.models.Expense;
 
 import java.util.ArrayList;
 
@@ -30,6 +33,8 @@ public class ProjectDetailActivity extends AppCompatActivity {
     private RecyclerView expenseRecycle;
     private DatabaseHelper dbHelper;
     private long projectId;
+    private ExpenseAdapter expenseAdapter;
+    private ArrayList<Expense> expenseList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,6 +145,23 @@ public class ProjectDetailActivity extends AppCompatActivity {
                         break;
                 }
             }
+
+            loadExpenses();
+        }
+    }
+
+    private void loadExpenses() {
+        expenseList = dbHelper.getExpensesByProject(projectId);
+
+        if (expenseAdapter == null) {
+            expenseAdapter = new ExpenseAdapter(this, expenseList, expense -> {
+                Intent intent = new Intent(ProjectDetailActivity.this, ExpenseDetailActivity.class);
+                intent.putExtra("EXPENSE_ID", expense.getId());
+                startActivity(intent);
+            });
+            expenseRecycle.setAdapter(expenseAdapter);
+        } else {
+            expenseAdapter.updateData(expenseList);
         }
     }
 

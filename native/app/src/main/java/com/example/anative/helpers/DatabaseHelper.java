@@ -288,6 +288,35 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         return expenses;
     }
+    public Expense getExpenseById(long id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Expense expense = null;
+        Cursor cursor = null;
+        try {
+            cursor = db.query(TABLE_EXPENSES, null, COLUMN_EXPENSE_ID + "=?",
+                    new String[]{String.valueOf(id)}, null, null, null);
+
+            if (cursor != null && cursor.moveToFirst()) {
+                long pId = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_FK_PROJECT_ID));
+                String code = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EXPENSE_CODE));
+                String date = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EXPENSE_DATE));
+                String currency = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EXPENSE_CURRENCY));
+                double amount = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_EXPENSE_AMOUNT));
+                String type = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EXPENSE_TYPE));
+                String method = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PAYMENT_METHOD));
+                String claimant = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_CLAIMANT));
+                String status = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PAYMENT_STATUS));
+                String des = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EXPENSE_DES));
+                String loc = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_EXPENSE_LOCATION));
+
+                expense = new Expense(id, pId, code, date, amount, currency, type, method, claimant, status, des, loc);
+            }
+        } finally {
+            if (cursor != null) cursor.close();
+            db.close();
+        }
+        return expense;
+    }
 
     public int updateExpense(Expense expense) {
         if (expense == null) {
