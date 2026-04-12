@@ -425,7 +425,7 @@
                     </LinearLayout>
 
                     <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/recyclerViewExpenses"
+                        android:id="@+id/expenseRecycle"
                         android:layout_width="match_parent"
                         android:layout_height="188dp"
                         android:minHeight="100dp"

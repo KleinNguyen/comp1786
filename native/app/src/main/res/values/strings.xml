@@ -2,7 +2,7 @@
     <string name="app_name">native</string>
     <string name="tab_all">All Project</string>
     <string name="tab_active">Active</string>
-    <string name="tab_pending">Pending</string>
+    <string name="tab_pending">On Hold</string>
     <string name="tab_completed">Completed</string>
     <string name="projectTracker">Project Tracker</string>
     <string name="addProject">Add Project</string>

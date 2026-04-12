@@ -157,6 +157,37 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         return projects;
     }
+    public ArrayList<Project> getProjectsByStatus(String status) {
+        ArrayList<Project> projects = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        try {
+            cursor = db.query(TABLE_PROJECTS, null, COLUMN_PROJECT_STATUS + "=?",
+                    new String[]{status}, null, null, COLUMN_PROJECT_ID + " DESC");
+
+            if (cursor != null && cursor.moveToFirst()) {
+                do {
+                    long id = cursor.getLong(cursor.getColumnIndexOrThrow(COLUMN_PROJECT_ID));
+                    String code = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PROJECT_CODE));
+                    String name = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PROJECT_NAME));
+                    String des = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PROJECT_DES));
+                    String start = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_START_DATE));
+                    String end = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_END_DATE));
+                    String owner = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PROJECT_OWNER));
+                    String statusValue = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PROJECT_STATUS));
+                    double budget = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_PROJECT_BUDGET));
+                    String req = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_SPECIAL_REQUIREMENT));
+                    String dept = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DEPT_INFO));
+
+                    projects.add(new Project(id, code, name, des, start, end, owner, statusValue, budget, req, dept));
+                } while (cursor.moveToNext());
+            }
+        } finally {
+            if (cursor != null) cursor.close();
+            db.close();
+        }
+        return projects;
+    }
     public int updateProject(Project project){
         if(project == null){
             Log.e(TAG, "Cannot update null project");
