@@ -2,142 +2,81 @@ package com.example.anative.models;
 
 public class Project {
     private long id;
-    private String project_code;
-    private String project_name;
-    private String project_des;
-    private String start_date;
-    private String end_date;
-    private String project_owner;
-    private String project_status;
-    private double project_budget;
-    private String special_requirement;
-    private String department_information;
-    private long expenseId;
+    private String projectCode;
+    private String projectName;
+    private String projectDescription;
+    private String startDate;
+    private String endDate;
+    private String projectOwner;
+    private String projectStatus;
+    private double projectBudget;
+    private String specialRequirement;
+    private String departmentInformation;
 
-    public Project(){
+    public Project() {}
 
-    }
-    public Project(long id,long expenseId, String project_code, String project_name,String project_des,String start_date, String end_date, String project_owner, String project_status, double project_budget, String special_requirement, String department_information){
+    public Project(long id, String projectCode, String projectName, String projectDescription,
+                   String startDate, String endDate, String projectOwner, String projectStatus,
+                   double projectBudget, String specialRequirement, String departmentInformation) {
         this.id = id;
-        this.expenseId = expenseId;
-        this.project_code = project_code;
-        this.project_name = project_name;
-        this.project_des = project_des;
-        this.start_date = start_date;
-        this.end_date = end_date;
-        this.project_owner = project_owner;
-        this.project_status = project_status;
-        this.project_budget = project_budget;
-        this.special_requirement = special_requirement;
-        this.department_information = department_information;
-    }
-    public Project(long expenseId, String project_code, String project_name,String project_des,String start_date, String end_date, String project_owner, String project_status, double project_budget, String special_requirement, String department_information){
-        this.expenseId = expenseId;
-        this.project_code = project_code;
-        this.project_name = project_name;
-        this.project_des = project_des;
-        this.start_date = start_date;
-        this.end_date = end_date;
-        this.project_owner = project_owner;
-        this.project_status = project_status;
-        this.project_budget = project_budget;
-        this.special_requirement = special_requirement;
-        this.department_information = department_information;
+        this.projectCode = projectCode;
+        this.projectName = projectName;
+        this.projectDescription = projectDescription;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.projectOwner = projectOwner;
+        this.projectStatus = projectStatus;
+        this.projectBudget = projectBudget;
+        this.specialRequirement = specialRequirement;
+        this.departmentInformation = departmentInformation;
     }
 
-    public long getId() {
-        return id;
+    public Project(String projectCode, String projectName, String projectDescription,
+                   String startDate, String endDate, String projectOwner, String projectStatus,
+                   double projectBudget, String specialRequirement, String departmentInformation) {
+        this.projectCode = projectCode;
+        this.projectName = projectName;
+        this.projectDescription = projectDescription;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.projectOwner = projectOwner;
+        this.projectStatus = projectStatus;
+        this.projectBudget = projectBudget;
+        this.specialRequirement = specialRequirement;
+        this.departmentInformation = departmentInformation;
     }
 
-    public void setId(long id) {
-        this.id = id;
-    }
 
-    public String getProject_code() {
-        return project_code;
-    }
+    public long getId() { return id; }
+    public void setId(long id) { this.id = id; }
 
-    public void setProject_code(String project_code) {
-        this.project_code = project_code;
-    }
+    public String getProjectCode() { return projectCode; }
+    public void setProjectCode(String projectCode) { this.projectCode = projectCode; }
 
-    public String getProject_name() {
-        return project_name;
-    }
+    public String getProjectName() { return projectName; }
+    public void setProjectName(String projectName) { this.projectName = projectName; }
 
-    public void setProject_name(String project_name) {
-        this.project_name = project_name;
-    }
+    public String getProjectDescription() { return projectDescription; }
+    public void setProjectDescription(String projectDescription) { this.projectDescription = projectDescription; }
 
-    public String getProject_des() {
-        return project_des;
-    }
+    public String getStartDate() { return startDate; }
+    public void setStartDate(String startDate) { this.startDate = startDate; }
 
-    public void setProject_des(String project_des) {
-        this.project_des = project_des;
-    }
+    public String getEndDate() { return endDate; }
+    public void setEndDate(String endDate) { this.endDate = endDate; }
 
-    public String getStart_date() {
-        return start_date;
-    }
+    public String getProjectOwner() { return projectOwner; }
+    public void setProjectOwner(String projectOwner) { this.projectOwner = projectOwner; }
 
-    public void setStart_date(String start_date) {
-        this.start_date = start_date;
-    }
+    public String getProjectStatus() { return projectStatus; }
+    public void setProjectStatus(String projectStatus) { this.projectStatus = projectStatus; }
 
-    public String getEnd_date() {
-        return end_date;
-    }
+    public double getProjectBudget() { return projectBudget; }
+    public void setProjectBudget(double projectBudget) { this.projectBudget = projectBudget; }
 
-    public void setEnd_date(String end_date) {
-        this.end_date = end_date;
-    }
+    public String getSpecialRequirement() { return specialRequirement; }
+    public void setSpecialRequirement(String specialRequirement) { this.specialRequirement = specialRequirement; }
 
-    public String getProject_owner() {
-        return project_owner;
-    }
-
-    public void setProject_owner(String project_owner) {
-        this.project_owner = project_owner;
-    }
-
-    public String getProject_status() {
-        return project_status;
-    }
-
-    public void setProject_status(String project_status) {
-        this.project_status = project_status;
-    }
-
-    public double getProject_budget() {
-        return project_budget;
-    }
-
-    public void setProject_budget(double project_budget) {
-        this.project_budget = project_budget;
-    }
-
-    public String getSpecial_requirement() {
-        return special_requirement;
-    }
-
-    public void setSpecial_requirement(String special_requirement) {
-        this.special_requirement = special_requirement;
-    }
-
-    public String getDepartment_information() {
-        return department_information;
-    }
-
-    public void setDepartment_information(String department_information) {
-        this.department_information = department_information;
-    }
-
-    public long getExpenseId() {
-        return expenseId;
-    }
-
-    public void setExpenseId(long expenseId) {
-        this.expenseId = expenseId;
-    }
+    public String getDepartmentInformation() { return departmentInformation; }
+    public void setDepartmentInformation(String departmentInformation) { this.departmentInformation = departmentInformation; }
 }
