@@ -12,10 +12,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Native">
         <activity
-            android:name=".activities.EditExpenseActivity"
+            android:name=".activities.EditProjectActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.EditProjectActivity"
+            android:name=".activities.EditExpenseActivity"
             android:exported="false" />
         <activity
             android:name=".activities.AddProjectActivity"
@@ -36,4 +36,5 @@
             </intent-filter>
         </activity>
     </application>
+
 </manifest>

@@ -188,53 +188,34 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         return projects;
     }
-    public int updateProject(Project project){
-        if(project == null){
-            Log.e(TAG, "Cannot update null project");
-            return 0;
-        }
+    public boolean updateProject(Project project) {
         SQLiteDatabase db = this.getWritableDatabase();
-        int rows = 0;
-        try{
-            ContentValues values = new ContentValues();
-            values.put(COLUMN_PROJECT_CODE, project.getProjectCode());
-            values.put(COLUMN_PROJECT_NAME, project.getProjectName());
-            values.put(COLUMN_PROJECT_DES, project.getProjectDescription());
-            values.put(COLUMN_START_DATE, project.getStartDate());
-            values.put(COLUMN_END_DATE, project.getEndDate());
-            values.put(COLUMN_PROJECT_OWNER, project.getProjectOwner());
-            values.put(COLUMN_PROJECT_STATUS, project.getProjectStatus());
-            values.put(COLUMN_PROJECT_BUDGET, project.getProjectBudget());
-            values.put(COLUMN_SPECIAL_REQUIREMENT, project.getSpecialRequirement());
-            values.put(COLUMN_DEPT_INFO, project.getDepartmentInformation());
-            rows = db.update(TABLE_PROJECTS, values, COLUMN_PROJECT_ID + "=?", new String[]{String.valueOf(project.getId())});
-            if(rows > 0){
-                Log.d(TAG, "Successful updated project: " + project.getProjectName());
-            } else {
-                Log.w(TAG, "No rows updated for project: " + project.getProjectName());
-            }
-        } catch (SQLException e){
-            Log.e(TAG, "Error updating project", e);
-        } finally {
-            db.close();
-        }
-        return rows;
+        ContentValues cv = new ContentValues();
+
+        cv.put(COLUMN_PROJECT_CODE, project.getProjectCode());
+        cv.put(COLUMN_PROJECT_NAME, project.getProjectName());
+        cv.put(COLUMN_PROJECT_DES, project.getProjectDescription());
+        cv.put(COLUMN_START_DATE, project.getStartDate());
+        cv.put(COLUMN_END_DATE, project.getEndDate());
+        cv.put(COLUMN_PROJECT_OWNER, project.getProjectOwner());
+        cv.put(COLUMN_PROJECT_STATUS, project.getProjectStatus());
+        cv.put(COLUMN_PROJECT_BUDGET, project.getProjectBudget());
+        cv.put(COLUMN_SPECIAL_REQUIREMENT, project.getSpecialRequirement());
+        cv.put(COLUMN_DEPT_INFO, project.getDepartmentInformation());
+
+        int result = db.update(TABLE_PROJECTS, cv, COLUMN_PROJECT_ID + "=?", new String[]{String.valueOf(project.getId())});
+        db.close();
+        return result > 0;
     }
-    public void deleteProject(Project project, long id){
-        if(id <= 0){
-            Log.e(TAG, "Invalid project ID for deletion: " + id);
-            return;
-        }
+
+    public boolean deleteProject(long id) {
+        if (id <= 0) return false;
         SQLiteDatabase db = this.getWritableDatabase();
-        try{
-            int rows = db.delete(TABLE_PROJECTS, COLUMN_PROJECT_ID + "=?", new String[] { String.valueOf(id) });
-            if(rows > 0){
-                Log.d(TAG, "Successfully deleted project with name" + project.getProjectName());
-            } else{
-                Log.w(TAG, "No project found with ID: " + id);
-            }
-        } catch (SQLException e){
-            Log.e(TAG, "Error deleting project with ID: " + id, e);
+        try {
+            int rows = db.delete(TABLE_PROJECTS, COLUMN_PROJECT_ID + "=?", new String[]{String.valueOf(id)});
+            return rows > 0;
+        } catch (SQLException e) {
+            return false;
         } finally {
             db.close();
         }
