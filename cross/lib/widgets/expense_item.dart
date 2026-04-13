@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../screens/expense_detail.dart'; // 1. THÊ
+import '../screens/expense_detail.dart';
 
 class ExpenseItem extends StatelessWidget {
   final String id;
@@ -24,7 +24,6 @@ class ExpenseItem extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
-        // 2. SỬA ONTAP TẠI ĐÂY
         onTap: () {
           Navigator.push(
             context,

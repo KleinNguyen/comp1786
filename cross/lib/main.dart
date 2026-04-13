@@ -14,7 +14,6 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Project Expense Tracker',
       theme: ThemeData(
-        // Using your preferred Blue & White theme
         primaryColor: const Color(0xFF1976D2),
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF1976D2),

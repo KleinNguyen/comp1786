@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class EditExpenseScreen extends StatefulWidget {
-  // Thêm các tham số để nhận dữ liệu cần sửa
   final Map<String, dynamic> expenseData;
 
   const EditExpenseScreen({super.key, required this.expenseData});
@@ -45,7 +44,6 @@ class _EditExpenseScreenState extends State<EditExpenseScreen> {
 
   @override
   void dispose() {
-    // Giải phóng bộ nhớ
     _idController.dispose();
     _dateController.dispose();
     _amountController.dispose();
