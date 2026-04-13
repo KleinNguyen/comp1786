@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "965615871128",
+    "firebase_url": "https://admin-app-firebase-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "admin-app-firebase",
+    "storage_bucket": "admin-app-firebase.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:965615871128:android:608bddffb64b04648a9ced",
+        "android_client_info": {
+          "package_name": "com.example.anative"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDSH-faoxhshFVHRN6gSPWskoi65ySdk-k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
