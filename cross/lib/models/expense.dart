@@ -27,15 +27,13 @@ class Expense {
     required this.location,
   });
 
-  factory Expense.fromMap(String id, Map<dynamic, dynamic> map) {
+  factory Expense.fromMap(String id, Map<String, dynamic> map) {
     return Expense(
       id: id,
-      projectId: map['projectId'],
+      projectId: map['projectId'] as String?,
       expenseCode: map['expenseCode'] ?? '',
       date: map['date'] ?? '',
-      amount: (map['amount'] is int)
-          ? (map['amount'] as int).toDouble()
-          : (map['amount'] ?? 0.0),
+      amount: (map['amount'] ?? 0.0).toDouble(),
       currency: map['currency'] ?? '',
       type: map['type'] ?? '',
       paymentMethod: map['paymentMethod'] ?? '',

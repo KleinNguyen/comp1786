@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../widgets/project_card.dart';
+import '../services/firebase_service.dart';
+import '../models/project.dart';
+import 'project_detail.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -10,11 +13,22 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final FirebaseService _service = FirebaseService();
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
+
+    _tabController.addListener(() {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   @override
@@ -26,23 +40,17 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           Container(
             padding: const EdgeInsets.only(top: 40, bottom: 10, left: 16, right: 16),
             color: const Color(0xFF1976D2),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Spacer(),
-                const Text(
-                  "Project Tracker",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
+            child: const Center(
+              child: Text(
+                "Project Tracker",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
                 ),
-                const Spacer(),
-              ],
+              ),
             ),
           ),
-
           Padding(
             padding: const EdgeInsets.all(12.0),
             child: TextField(
@@ -59,7 +67,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               ),
             ),
           ),
-
           TabBar(
             controller: _tabController,
             labelColor: const Color(0xFF1976D2),
@@ -73,26 +80,55 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               Tab(text: "Completed"),
             ],
           ),
-
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.all(8),
-              children: const [
-                ProjectCard(
-                  name: "Mobile App Development",
-                  code: "Code: A00001",
-                  owner: "By Nguyen Sy Huong",
-                  status: "Active",
-                  budget: "\$5000",
-                ),
-                ProjectCard(
-                  name: "Game Metroidvania",
-                  code: "Code: G00002",
-                  owner: "By Nguyen Sy Huong",
-                  status: "Pending",
-                  budget: "\$2500",
-                ),
-              ],
+            child: StreamBuilder<List<Project>>(
+              stream: _service.getProjects(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return Center(child: Text("Error: ${snapshot.error}"));
+                }
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text("No projects found."));
+                }
+
+                List<Project> filteredProjects = snapshot.data!;
+
+                if (_tabController.index == 1) {
+                  filteredProjects = filteredProjects.where((p) => p.projectStatus.toLowerCase() == "active").toList();
+                } else if (_tabController.index == 2) {
+                  filteredProjects = filteredProjects.where((p) => p.projectStatus.toLowerCase() == "on hold").toList();
+                } else if (_tabController.index == 3) {
+                  filteredProjects = filteredProjects.where((p) => p.projectStatus.toLowerCase() == "completed").toList();
+                }
+
+                return ListView.builder(
+                  padding: const EdgeInsets.all(8),
+                  itemCount: filteredProjects.length,
+                  itemBuilder: (context, index) {
+                    final project = filteredProjects[index];
+                    return InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ProjectDetailScreen(project: project),
+                          ),
+                        );
+                      },
+                      child: ProjectCard(
+                        name: project.projectName,
+                        code: "Code: ${project.projectCode}",
+                        owner: "By ${project.projectOwner}",
+                        status: project.projectStatus,
+                        budget: project.projectBudget,
+                      ),
+                    );
+                  },
+                );
+              },
             ),
           ),
         ],

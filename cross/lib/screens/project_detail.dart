@@ -1,9 +1,25 @@
 import 'package:flutter/material.dart';
 import '../widgets/expense_item.dart';
 import 'add_expense.dart';
+import '../models/project.dart';
 
 class ProjectDetailScreen extends StatelessWidget {
-  const ProjectDetailScreen({super.key});
+  final Project project;
+
+  const ProjectDetailScreen({super.key, required this.project});
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case "active":
+        return const Color(0xFF1976D2);
+      case "on hold":
+        return const Color(0xFFFBC02D);
+      case "completed":
+        return const Color(0xFF2E7D32);
+      default:
+        return Colors.black;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,41 +79,47 @@ class ProjectDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildInfoRow("Project Name:", "Mobile App Development"),
+            _buildInfoRow("Project Name:", project.projectName),
             const Divider(height: 24),
-            _buildInfoRow("Project Code:", "Code: A00001"),
+            _buildInfoRow("Project Code:", "Code: ${project.projectCode}"),
             const Divider(height: 24),
-            _buildInfoRow("Owner:", "Nguyen Sy Huong"),
+            _buildInfoRow("Owner:", project.projectOwner),
             const Divider(height: 24),
             Row(
               children: [
-                _buildVerticalInfo("Start Date", "01/01/2026"),
-                _buildVerticalInfo("End Date", "31/12/2026"),
+                _buildVerticalInfo("Start Date", project.startDate),
+                _buildVerticalInfo("End Date", project.endDate),
               ],
             ),
             const Divider(height: 24),
             Row(
               children: [
-                _buildVerticalInfo("Status", "Active", color: const Color(0xFF1976D2)),
-                _buildVerticalInfo("Budget", "\$5,000.00", color: const Color(0xFF2E7D32)),
+                _buildVerticalInfo(
+                    "Status",
+                    project.projectStatus,
+                    color: _getStatusColor(project.projectStatus)
+                ),
+                _buildVerticalInfo(
+                    "Budget",
+                    "\$${project.projectBudget.toStringAsFixed(2)}",
+                    color: const Color(0xFF2E7D32)
+                ),
               ],
             ),
             const Divider(height: 24),
             _buildSectionHeader("Description"),
-            const Text("Building a cross-platform app using Flutter.", style: TextStyle(fontSize: 16)),
+            Text(project.projectDescription, style: const TextStyle(fontSize: 16)),
             const Divider(height: 24),
             _buildSectionHeader("Special Requirements"),
-            const Text("None", style: TextStyle(fontSize: 16)),
+            Text(project.specialRequirement.isEmpty ? "None" : project.specialRequirement, style: const TextStyle(fontSize: 16)),
             const Divider(height: 24),
             _buildSectionHeader("Department Information"),
-            const Text("IT Department", style: TextStyle(fontSize: 16)),
-
+            Text(project.departmentInformation.isEmpty ? "N/A" : project.departmentInformation, style: const TextStyle(fontSize: 16)),
           ],
         ),
       ),
     );
   }
-
 
   Widget _buildExpensesCard(BuildContext context) {
     return Card(
@@ -139,17 +161,7 @@ class ProjectDetailScreen extends StatelessWidget {
           Container(
             height: 250,
             padding: const EdgeInsets.all(8),
-            child: ListView(
-              children: const [
-                ExpenseItem(
-                  id: "EX001",
-                  date: "2026-04-14",
-                  claimant: "Pham Minh Tuan",
-                  type: "Travel",
-                  amount: "\$150.00",
-                ),
-              ],
-            ),
+            child: const Center(child: Text("No expenses recorded")),
           ),
         ],
       ),
@@ -172,7 +184,7 @@ class ProjectDetailScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(label, style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 14)),
-          Text(value, style: TextStyle(fontSize: 16, fontWeight: color != Colors.black ? FontWeight.bold : FontWeight.normal, color: color)),
+          Text(value, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: color)),
         ],
       ),
     );

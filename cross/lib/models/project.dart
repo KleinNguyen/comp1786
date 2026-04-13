@@ -29,7 +29,7 @@ class Project {
     this.expenses,
   });
 
-  factory Project.fromMap(String id, Map<dynamic, dynamic> map) {
+  factory Project.fromMap(String id, Map<String, dynamic> map) {
     return Project(
       id: id,
       projectCode: map['projectCode'] ?? '',
@@ -39,11 +39,10 @@ class Project {
       endDate: map['endDate'] ?? '',
       projectOwner: map['projectOwner'] ?? '',
       projectStatus: map['projectStatus'] ?? '',
-      projectBudget: (map['projectBudget'] is int)
-          ? (map['projectBudget'] as int).toDouble()
-          : (map['projectBudget'] ?? 0.0),
+      projectBudget: (map['projectBudget'] ?? 0.0).toDouble(),
       specialRequirement: map['specialRequirement'] ?? '',
       departmentInformation: map['departmentInformation'] ?? '',
+      expenses: [],
     );
   }
 
