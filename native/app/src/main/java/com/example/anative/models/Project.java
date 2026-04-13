@@ -1,5 +1,7 @@
 package com.example.anative.models;
 
+import java.util.ArrayList;
+
 public class Project {
     private long id;
     private String projectCode;
@@ -12,6 +14,7 @@ public class Project {
     private double projectBudget;
     private String specialRequirement;
     private String departmentInformation;
+    private ArrayList<Expense> expenses;
 
     public Project() {}
 
@@ -79,4 +82,7 @@ public class Project {
 
     public String getDepartmentInformation() { return departmentInformation; }
     public void setDepartmentInformation(String departmentInformation) { this.departmentInformation = departmentInformation; }
+    public ArrayList<Expense> getExpenses() { return expenses; }
+    public void setExpenses(ArrayList<Expense> expenses) { this.expenses = expenses; }
+
 }

@@ -406,4 +406,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return list;
     }
+    public ArrayList<Project> getAllProjectsWithExpenses() {
+        ArrayList<Project> projects = getAllProjects();
+        for (Project project : projects) {
+            ArrayList<Expense> expenseList = getExpensesByProject(project.getId());
+            project.setExpenses(expenseList);
+        }
+
+        return projects;
+    }
 }
