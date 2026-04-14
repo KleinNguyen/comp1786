@@ -8,11 +8,11 @@ class ExpenseDetailScreen extends StatelessWidget {
 
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {
-      case "Paid":
+      case "paid":
         return const Color(0xFF2E7D32);
-      case "Pending":
+      case "pending":
         return const Color(0xFFFBC02D);
-      case "Reimbursed":
+      case "reimbursed":
         return Colors.red;
       default:
         return const Color(0xFF1976D2);
@@ -66,6 +66,7 @@ class ExpenseDetailScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // ĐÃ XÓA DÒNG EXPENSE ID TẠI ĐÂY
                       _buildInfoRow("Expense Code:", expenseData['expenseCode']?.toString() ?? "N/A"),
                       const Divider(height: 24),
                       _buildInfoRow("Claimant:", expenseData['claimant'] ?? "N/A"),
@@ -83,7 +84,7 @@ class ExpenseDetailScreen extends StatelessWidget {
                           _buildVerticalInfo(
                               "Status",
                               currentStatus,
-                              color: _getStatusColor(currentStatus) // Đổi màu tại đây
+                              color: _getStatusColor(currentStatus)
                           ),
                           _buildVerticalInfo(
                               "Amount",
@@ -100,44 +101,6 @@ class ExpenseDetailScreen extends StatelessWidget {
                         style: const TextStyle(fontSize: 16),
                       ),
                       const Divider(height: 24),
-                      // Row(
-                      //   children: [
-                      //     Expanded(
-                      //       child: OutlinedButton(
-                      //         onPressed: () {},
-                      //         style: OutlinedButton.styleFrom(
-                      //           foregroundColor: Colors.red,
-                      //           side: const BorderSide(color: Colors.red),
-                      //           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      //           padding: const EdgeInsets.symmetric(vertical: 12),
-                      //         ),
-                      //         child: const Text("Delete", style: TextStyle(fontSize: 16)),
-                      //       ),
-                      //     ),
-                      //     const SizedBox(width: 16),
-                      //     Expanded(
-                      //       child: ElevatedButton(
-                      //         onPressed: () {
-                      //           Navigator.push(
-                      //             context,
-                      //             MaterialPageRoute(
-                      //               builder: (context) => EditExpenseScreen(
-                      //                 expenseData: expenseData,
-                      //               ),
-                      //             ),
-                      //           );
-                      //         },
-                      //         style: ElevatedButton.styleFrom(
-                      //           backgroundColor: const Color(0xFF1976D2),
-                      //           foregroundColor: Colors.white,
-                      //           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      //           padding: const EdgeInsets.symmetric(vertical: 12),
-                      //         ),
-                      //         child: const Text("Edit Expense", style: TextStyle(fontSize: 16)),
-                      //       ),
-                      //     ),
-                      //   ],
-                      // ),
                     ],
                   ),
                 ),
@@ -149,6 +112,7 @@ class ExpenseDetailScreen extends StatelessWidget {
     );
   }
 
+  // ... (Các hàm _buildInfoRow, _buildVerticalInfo, _buildSectionHeader giữ nguyên)
   Widget _buildInfoRow(String label, String value) {
     return Row(
       children: [

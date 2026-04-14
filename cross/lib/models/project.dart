@@ -1,7 +1,7 @@
 import 'expense.dart';
 
 class Project {
-  final String id;
+  final int id;
   String projectCode;
   String projectName;
   String projectDescription;
@@ -29,7 +29,7 @@ class Project {
     this.expenses = const [],
   });
 
-  factory Project.fromMap(String id, Map<String, dynamic> map) {
+  factory Project.fromMap(dynamic id, Map<dynamic, dynamic> map) {
     var expenseData = map['expenses'];
     List<Expense> list = [];
 
@@ -41,14 +41,14 @@ class Project {
       } else if (expenseData is List) {
         for (var i = 0; i < expenseData.length; i++) {
           if (expenseData[i] != null) {
-            list.add(Expense.fromMap(i.toString(), Map<String, dynamic>.from(expenseData[i])));
+            list.add(Expense.fromMap(i, Map<String, dynamic>.from(expenseData[i])));
           }
         }
       }
     }
 
     return Project(
-      id: id,
+      id: int.tryParse(id.toString()) ?? 0,
       projectCode: map['projectCode'] ?? '',
       projectName: map['projectName'] ?? '',
       projectDescription: map['projectDescription'] ?? '',
@@ -65,6 +65,7 @@ class Project {
 
   Map<String, dynamic> toMap() {
     return {
+      'id': id,
       'projectCode': projectCode,
       'projectName': projectName,
       'projectDescription': projectDescription,
@@ -75,6 +76,7 @@ class Project {
       'projectBudget': projectBudget,
       'specialRequirement': specialRequirement,
       'departmentInformation': departmentInformation,
+      'expenses': expenses.map((e) => e.toMap()).toList(),
     };
   }
 }

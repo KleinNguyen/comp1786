@@ -147,6 +147,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         );
                       },
                       child: ProjectCard(
+                        id: project.id,
                         name: project.projectName,
                         code: "Code: ${project.projectCode}",
                         owner: "By ${project.projectOwner}",

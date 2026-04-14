@@ -23,16 +23,30 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
-        android:id="@+id/btnSyncCloud"
+        android:id="@+id/btnUploadCloud"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:layout_marginEnd="12dp"
+        android:layout_marginEnd="8dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Sync to Cloud"
+        android:contentDescription="Upload to Cloud"
         android:padding="8dp"
-        android:src="@android:drawable/ic_popup_sync"
+        android:src="@android:drawable/ic_menu_upload"
         app:layout_constraintBottom_toBottomOf="@+id/textView"
         app:layout_constraintEnd_toEndOf="@+id/textView"
+        app:layout_constraintTop_toTopOf="@+id/textView"
+        app:tint="#FFFFFF" />
+
+    <ImageButton
+        android:id="@+id/btnDownloadCloud"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginEnd="4dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Download from Cloud"
+        android:padding="8dp"
+        android:src="@android:drawable/stat_sys_download"
+        app:layout_constraintBottom_toBottomOf="@+id/textView"
+        app:layout_constraintEnd_toStartOf="@+id/btnUploadCloud"
         app:layout_constraintTop_toTopOf="@+id/textView"
         app:tint="#FFFFFF" />
 

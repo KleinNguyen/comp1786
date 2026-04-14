@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/firebase_service.dart';
 
 class AddExpenseScreen extends StatefulWidget {
-  final String projectId;
+  final int projectId;
 
   const AddExpenseScreen({super.key, required this.projectId});
 
@@ -12,8 +12,7 @@ class AddExpenseScreen extends StatefulWidget {
 
 class _AddExpenseScreenState extends State<AddExpenseScreen> {
   final FirebaseService _service = FirebaseService();
-
-  final TextEditingController _idController = TextEditingController();
+  final TextEditingController _codeController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _currencyController = TextEditingController(text: "USD");
@@ -33,25 +32,36 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     "Software/Licenses",
     "Labour costs",
     "Utilities",
-    "Miscellaneous"];
+    "Miscellaneous"
+  ];
   final List<String> _paymentMethods = [
     "Cash",
     "Credit Card",
     "Bank Transfer",
-    "Cheque"];
+    "Cheque"
+  ];
   final List<String> _statusOptions = [
     "Pending",
     "Paid",
-    "Reimbursed"];
+    "Reimbursed"
+  ];
 
   Future<void> _handleSave() async {
-    if (_idController.text.trim().isEmpty ||
-        _dateController.text.trim().isEmpty ||
+    final String codeText = _codeController.text.trim();
+
+    if (codeText.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter Expense Code")),
+      );
+      return;
+    }
+
+    if (_dateController.text.trim().isEmpty ||
         _amountController.text.trim().isEmpty ||
         _currencyController.text.trim().isEmpty ||
         _claimantController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please fill all required fields (ID, Date, Amount, Currency, Claimant)")),
+        const SnackBar(content: Text("Please fill all required fields")),
       );
       return;
     }
@@ -66,8 +76,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     }
 
     final Map<String, dynamic> expenseData = {
-      "expenseCode": _idController.text.trim(),
-      "id": _idController.text.trim(),
+      "expenseCode": codeText, // Lưu là String
       "date": _dateController.text.trim(),
       "amount": double.tryParse(_amountController.text.trim()) ?? 0.0,
       "currency": _currencyController.text.trim(),
@@ -130,7 +139,8 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 children: [
-                  _buildTextField("Expense ID", _idController),
+                  // Sửa label hiển thị thành Expense Code
+                  _buildTextField("Expense Code", _codeController),
                   _buildTextField(
                       "Date of Expense",
                       _dateController,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ProjectCard extends StatelessWidget {
+  final int id;
   final String name;
   final String code;
   final String owner;
@@ -9,6 +10,7 @@ class ProjectCard extends StatelessWidget {
 
   const ProjectCard({
     super.key,
+    required this.id,
     required this.name,
     required this.code,
     required this.owner,
@@ -40,12 +42,21 @@ class ProjectCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    name,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 4),
             Text(code, style: const TextStyle(color: Colors.grey)),
             Text(owner, style: const TextStyle(color: Colors.grey)),
             const SizedBox(height: 8),
-
             Row(
               children: [
                 const Text("Status: "),
@@ -58,7 +69,6 @@ class ProjectCard extends StatelessWidget {
                 ),
               ],
             ),
-
             Row(
               children: [
                 const Text("Budget: "),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class ExpenseItem extends StatelessWidget {
-  final String id;
+  final String expenseCode;
   final String date;
   final String claimant;
   final String type;
@@ -9,7 +9,7 @@ class ExpenseItem extends StatelessWidget {
 
   const ExpenseItem({
     super.key,
-    required this.id,
+    required this.expenseCode,
     required this.date,
     required this.claimant,
     required this.type,
@@ -28,7 +28,7 @@ class ExpenseItem extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              id,
+              expenseCode,
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 6),

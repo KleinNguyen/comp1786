@@ -22,7 +22,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "project_expense.db";
     private static final int DATABASE_VERSION = 2;
     private static final String TAG = "DatabaseHelper";
-//    project_db
     private static final String TABLE_PROJECTS = "projects";
     private static final String COLUMN_PROJECT_ID = "id";
     private static final String COLUMN_PROJECT_CODE = "project_code";
@@ -94,6 +93,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_EXPENSES);
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_PROJECTS);
         onCreate(db);
+    }
+
+    @Override
+    public void onConfigure(SQLiteDatabase db) {
+        super.onConfigure(db);
+        db.setForeignKeyConstraintsEnabled(true);
     }
 
     public long addProject(Project project){
@@ -211,14 +216,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public boolean deleteProject(long id) {
         if (id <= 0) return false;
         SQLiteDatabase db = this.getWritableDatabase();
+        int rows = 0;
         try {
-            int rows = db.delete(TABLE_PROJECTS, COLUMN_PROJECT_ID + "=?", new String[]{String.valueOf(id)});
-            return rows > 0;
+            rows = db.delete(TABLE_PROJECTS, COLUMN_PROJECT_ID + "=?", new String[]{String.valueOf(id)});
         } catch (SQLException e) {
-            return false;
+            Log.e(TAG, "Error deleting project", e);
         } finally {
             db.close();
         }
+        return rows > 0;
     }
 
     public long addExpense(Expense expense) {
@@ -414,5 +420,64 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         return projects;
+    }
+    public void syncRemoteDataToLocal(ArrayList<Project> remoteProjects) {
+        if (remoteProjects == null || remoteProjects.isEmpty()) {
+            Log.d(TAG, "No remote projects to sync.");
+            return;
+        }
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.beginTransaction(); // Start transaction to ensure data integrity
+        try {
+            // IMPORTANT: Clear local data first to avoid UNIQUE constraint conflicts
+            db.delete(TABLE_EXPENSES, null, null);
+            db.delete(TABLE_PROJECTS, null, null);
+            Log.d(TAG, "Cleared local tables for fresh sync from Firebase.");
+
+            for (Project project : remoteProjects) {
+                ContentValues projectValues = new ContentValues();
+                projectValues.put(COLUMN_PROJECT_ID, project.getId());
+                projectValues.put(COLUMN_PROJECT_CODE, project.getProjectCode());
+                projectValues.put(COLUMN_PROJECT_NAME, project.getProjectName());
+                projectValues.put(COLUMN_PROJECT_DES, project.getProjectDescription());
+                projectValues.put(COLUMN_START_DATE, project.getStartDate());
+                projectValues.put(COLUMN_END_DATE, project.getEndDate());
+                projectValues.put(COLUMN_PROJECT_OWNER, project.getProjectOwner());
+                projectValues.put(COLUMN_PROJECT_STATUS, project.getProjectStatus());
+                projectValues.put(COLUMN_PROJECT_BUDGET, project.getProjectBudget());
+                projectValues.put(COLUMN_SPECIAL_REQUIREMENT, project.getSpecialRequirement());
+                projectValues.put(COLUMN_DEPT_INFO, project.getDepartmentInformation());
+
+                db.insert(TABLE_PROJECTS, null, projectValues);
+
+                if (project.getExpenses() != null) {
+                    for (Expense expense : project.getExpenses()) {
+                        ContentValues expenseValues = new ContentValues();
+                        expenseValues.put(COLUMN_FK_PROJECT_ID, project.getId());
+                        expenseValues.put(COLUMN_EXPENSE_CODE, expense.getExpenseCode());
+                        expenseValues.put(COLUMN_EXPENSE_DATE, expense.getDate());
+                        expenseValues.put(COLUMN_EXPENSE_CURRENCY, expense.getCurrency());
+                        expenseValues.put(COLUMN_EXPENSE_AMOUNT, expense.getAmount());
+                        expenseValues.put(COLUMN_EXPENSE_TYPE, expense.getType());
+                        expenseValues.put(COLUMN_PAYMENT_METHOD, expense.getPaymentMethod());
+                        expenseValues.put(COLUMN_CLAIMANT, expense.getClaimant());
+                        expenseValues.put(COLUMN_PAYMENT_STATUS, expense.getPaymentStatus());
+                        expenseValues.put(COLUMN_EXPENSE_DES, expense.getDescription());
+                        expenseValues.put(COLUMN_EXPENSE_LOCATION, expense.getLocation());
+
+                        long expId = db.insert(TABLE_EXPENSES, null, expenseValues);
+                        Log.d(TAG, "Added Expense: " + expense.getExpenseCode() + " with SQLite ID: " + expId);
+                    }
+                }
+            }
+            db.setTransactionSuccessful();
+            Log.d(TAG, "Transaction successful. Data saved to disk.");
+        } catch (Exception e) {
+            Log.e(TAG, "Error during syncRemoteDataToLocal", e);
+        } finally {
+            db.endTransaction();
+            db.close();
+        }
     }
 }

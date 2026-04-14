@@ -20,8 +20,8 @@ public class Expense {
                    String type, String paymentMethod, String claimant, String paymentStatus,
                    String description, String location) {
         this.id = id;
-        this.expenseCode = expenseCode;
         this.projectId = projectId;
+        this.expenseCode = expenseCode;
         this.date = date;
         this.amount = amount;
         this.currency = currency;

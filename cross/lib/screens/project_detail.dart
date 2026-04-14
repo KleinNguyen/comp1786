@@ -11,7 +11,7 @@ class ProjectDetailScreen extends StatelessWidget {
   const ProjectDetailScreen({super.key, required this.project});
 
   Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
+    switch (status.toLowerCase().trim()) {
       case "active":
         return const Color(0xFF1976D2);
       case "on hold":
@@ -25,54 +25,71 @@ class ProjectDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
-      body: Column(
-        children: [
-          Container(
-            height: 100,
-            padding: const EdgeInsets.only(top: 40, left: 8, right: 8),
-            color: const Color(0xFF1976D2),
-            child: Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
-                  onPressed: () => Navigator.pop(context),
-                ),
-                const Expanded(
-                  child: Center(
-                    child: Text(
-                      "Project Detail",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
+    final projectRef = FirebaseDatabase.instance.ref().child('projects/${project.id}');
+
+    return StreamBuilder(
+      stream: projectRef.onValue,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        }
+
+        Project currentProject = project;
+        if (snapshot.hasData && snapshot.data!.snapshot.value != null) {
+          final data = Map<dynamic, dynamic>.from(snapshot.data!.snapshot.value as Map);
+          currentProject = Project.fromMap(project.id, data);
+        }
+
+        return Scaffold(
+          backgroundColor: const Color(0xFFF5F5F5),
+          body: Column(
+            children: [
+              Container(
+                height: 100,
+                padding: const EdgeInsets.only(top: 40, left: 8, right: 8),
+                color: const Color(0xFF1976D2),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    const Expanded(
+                      child: Center(
+                        child: Text(
+                          "Project Detail",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
+                    const SizedBox(width: 48),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    children: [
+                      _buildProjectInfoCard(currentProject),
+                      const SizedBox(height: 12),
+                      _buildExpensesCard(context, currentProject),
+                    ],
                   ),
                 ),
-                const SizedBox(width: 48),
-              ],
-            ),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                children: [
-                  _buildProjectInfoCard(),
-                  const SizedBox(height: 12),
-                  _buildExpensesCard(context),
-                ],
               ),
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildProjectInfoCard() {
+  Widget _buildProjectInfoCard(Project p) {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -81,16 +98,16 @@ class ProjectDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildInfoRow("Project Name:", project.projectName),
+            _buildInfoRow("Project Name:", p.projectName),
             const Divider(height: 24),
-            _buildInfoRow("Project Code:", project.projectCode),
+            _buildInfoRow("Project Code:", p.projectCode),
             const Divider(height: 24),
-            _buildInfoRow("Owner:", project.projectOwner),
+            _buildInfoRow("Owner:", p.projectOwner),
             const Divider(height: 24),
             Row(
               children: [
-                _buildVerticalInfo("Start Date", project.startDate),
-                _buildVerticalInfo("End Date", project.endDate),
+                _buildVerticalInfo("Start Date", p.startDate),
+                _buildVerticalInfo("End Date", p.endDate),
               ],
             ),
             const Divider(height: 24),
@@ -98,33 +115,33 @@ class ProjectDetailScreen extends StatelessWidget {
               children: [
                 _buildVerticalInfo(
                     "Status",
-                    project.projectStatus,
-                    color: _getStatusColor(project.projectStatus)
+                    p.projectStatus,
+                    color: _getStatusColor(p.projectStatus)
                 ),
                 _buildVerticalInfo(
                     "Budget",
-                    "\$${project.projectBudget.toStringAsFixed(2)}",
+                    "\$${p.projectBudget.toStringAsFixed(2)}",
                     color: const Color(0xFF2E7D32)
                 ),
               ],
             ),
             const Divider(height: 24),
             _buildSectionHeader("Description"),
-            Text(project.projectDescription, style: const TextStyle(fontSize: 16)),
+            Text(p.projectDescription, style: const TextStyle(fontSize: 16)),
             const Divider(height: 24),
             _buildSectionHeader("Special Requirements"),
-            Text(project.specialRequirement.isEmpty ? "None" : project.specialRequirement, style: const TextStyle(fontSize: 16)),
+            Text(p.specialRequirement.isEmpty ? "None" : p.specialRequirement, style: const TextStyle(fontSize: 16)),
             const Divider(height: 24),
             _buildSectionHeader("Department Information"),
-            Text(project.departmentInformation.isEmpty ? "None" : project.departmentInformation, style: const TextStyle(fontSize: 16)),
+            Text(p.departmentInformation.isEmpty ? "None" : p.departmentInformation, style: const TextStyle(fontSize: 16)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildExpensesCard(BuildContext context) {
-    final databaseRef = FirebaseDatabase.instance.ref().child('projects/${project.id}/expenses');
+  Widget _buildExpensesCard(BuildContext context, Project p) {
+    final databaseRef = FirebaseDatabase.instance.ref().child('projects/${p.id}/expenses');
 
     return Card(
       elevation: 4,
@@ -148,7 +165,7 @@ class ProjectDetailScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => AddExpenseScreen(projectId: project.id),
+                        builder: (context) => AddExpenseScreen(projectId: p.id),
                       ),
                     );
                   },
@@ -163,7 +180,7 @@ class ProjectDetailScreen extends StatelessWidget {
             ),
           ),
           Container(
-            height: 300,
+            height: 350,
             padding: const EdgeInsets.all(8),
             child: StreamBuilder(
               stream: databaseRef.onValue,
@@ -174,19 +191,24 @@ class ProjectDetailScreen extends StatelessWidget {
 
                 if (snapshot.hasData && snapshot.data!.snapshot.value != null) {
                   final dynamic data = snapshot.data!.snapshot.value;
-                  List<dynamic> expenseList = [];
+                  List<Map<String, dynamic>> expenseList = [];
 
-                  if (data is List) {
-                    expenseList = data.where((e) => e != null).toList();
-                  } else if (data is Map) {
-                    expenseList = data.values.toList();
+                  if (data is Map) {
+                    data.forEach((key, value) {
+                      expenseList.add(Map<String, dynamic>.from(value as Map));
+                    });
+                  } else if (data is List) {
+                    expenseList = data
+                        .where((e) => e != null)
+                        .map((e) => Map<String, dynamic>.from(e as Map))
+                        .toList();
                   }
 
                   return ListView.builder(
                     padding: EdgeInsets.zero,
                     itemCount: expenseList.length,
                     itemBuilder: (context, index) {
-                      final item = Map<String, dynamic>.from(expenseList[index]);
+                      final item = expenseList[index];
                       return InkWell(
                         onTap: () {
                           Navigator.push(
@@ -197,7 +219,7 @@ class ProjectDetailScreen extends StatelessWidget {
                           );
                         },
                         child: ExpenseItem(
-                          id: item['expenseCode']?.toString() ?? "N/A",
+                          expenseCode: item['expenseCode']?.toString() ?? "N/A",
                           date: item['date'] ?? "",
                           claimant: item['claimant'] ?? "",
                           type: item['type'] ?? "",
