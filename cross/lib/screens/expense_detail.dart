@@ -1,10 +1,30 @@
 import 'package:flutter/material.dart';
 import 'edit_expense.dart';
+
 class ExpenseDetailScreen extends StatelessWidget {
-  const ExpenseDetailScreen({super.key});
+  final Map<String, dynamic> expenseData;
+
+  const ExpenseDetailScreen({super.key, required this.expenseData});
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case "Paid":
+        return const Color(0xFF2E7D32);
+      case "Pending":
+        return const Color(0xFFFBC02D);
+      case "Reimbursed":
+        return Colors.red;
+      default:
+        return const Color(0xFF1976D2);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final String location = expenseData['location']?.toString() ?? "";
+    final String description = expenseData['description']?.toString() ?? "";
+    final String currentStatus = expenseData['paymentStatus'] ?? "Pending";
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       body: Column(
@@ -35,8 +55,6 @@ class ExpenseDetailScreen extends StatelessWidget {
               ],
             ),
           ),
-
-          // Main Content
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(12),
@@ -48,90 +66,78 @@ class ExpenseDetailScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildInfoRow("Expense ID:", "EX001"),
+                      _buildInfoRow("Expense Code:", expenseData['expenseCode']?.toString() ?? "N/A"),
                       const Divider(height: 24),
-
-                      _buildInfoRow("Claimant:", "Pham Minh Tuan"),
+                      _buildInfoRow("Claimant:", expenseData['claimant'] ?? "N/A"),
                       const Divider(height: 24),
-
-                      _buildInfoRow("Location:", "Hanoi, Vietnam"),
+                      _buildInfoRow("Location:", location.isEmpty ? "None" : location),
                       const Divider(height: 24),
-
-                      _buildInfoRow("Date:", "2026-04-14"),
+                      _buildInfoRow("Date:", expenseData['date'] ?? "N/A"),
                       const Divider(height: 24),
-
-                      _buildInfoRow("Type:", "Travel"),
+                      _buildInfoRow("Type:", expenseData['type'] ?? "N/A"),
                       const Divider(height: 24),
-
-                      _buildInfoRow("Payment Method:", "Credit Card"),
+                      _buildInfoRow("Payment Method:", expenseData['paymentMethod'] ?? "N/A"),
                       const Divider(height: 24),
-
                       Row(
                         children: [
-                          _buildVerticalInfo("Status", "Paid", color: const Color(0xFF1976D2)),
-                          _buildVerticalInfo("Amount", "\$150.00", color: const Color(0xFF2E7D32)),
+                          _buildVerticalInfo(
+                              "Status",
+                              currentStatus,
+                              color: _getStatusColor(currentStatus) // Đổi màu tại đây
+                          ),
+                          _buildVerticalInfo(
+                              "Amount",
+                              "\$${expenseData['amount']?.toString() ?? "0.00"}",
+                              color: const Color(0xFF2E7D32)
+                          ),
                         ],
                       ),
                       const Divider(height: 24),
-
                       _buildSectionHeader("Description"),
                       const SizedBox(height: 4),
-                      const Text(
-                        "Taxi fare for meeting with client at the airport.",
-                        style: TextStyle(fontSize: 16),
+                      Text(
+                        description.isEmpty ? "None" : description,
+                        style: const TextStyle(fontSize: 16),
                       ),
                       const Divider(height: 24),
-
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: () {
-                              },
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: Colors.red,
-                                side: const BorderSide(color: Colors.red),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                              ),
-                              child: const Text("Delete", style: TextStyle(fontSize: 16)),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => EditExpenseScreen(
-                                      expenseData: {
-                                        'id': 'EX001',
-                                        'date': '2026-04-14',
-                                        'amount': 150.00,
-                                        'currency': 'USD',
-                                        'type': 'Travel',
-                                        'paymentMethod': 'Credit Card',
-                                        'claimant': 'Pham Minh Tuan',
-                                        'status': 'Paid',
-                                        'location': 'Hanoi, Vietnam',
-                                        'description': 'Taxi fare for meeting with client at the airport.',
-                                      },
-                                    ),
-                                  ),
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF1976D2),
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                              ),
-                              child: const Text("Edit Expense", style: TextStyle(fontSize: 16)),
-                            ),
-                          ),
-                        ],
-                      ),
+                      // Row(
+                      //   children: [
+                      //     Expanded(
+                      //       child: OutlinedButton(
+                      //         onPressed: () {},
+                      //         style: OutlinedButton.styleFrom(
+                      //           foregroundColor: Colors.red,
+                      //           side: const BorderSide(color: Colors.red),
+                      //           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      //           padding: const EdgeInsets.symmetric(vertical: 12),
+                      //         ),
+                      //         child: const Text("Delete", style: TextStyle(fontSize: 16)),
+                      //       ),
+                      //     ),
+                      //     const SizedBox(width: 16),
+                      //     Expanded(
+                      //       child: ElevatedButton(
+                      //         onPressed: () {
+                      //           Navigator.push(
+                      //             context,
+                      //             MaterialPageRoute(
+                      //               builder: (context) => EditExpenseScreen(
+                      //                 expenseData: expenseData,
+                      //               ),
+                      //             ),
+                      //           );
+                      //         },
+                      //         style: ElevatedButton.styleFrom(
+                      //           backgroundColor: const Color(0xFF1976D2),
+                      //           foregroundColor: Colors.white,
+                      //           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      //           padding: const EdgeInsets.symmetric(vertical: 12),
+                      //         ),
+                      //         child: const Text("Edit Expense", style: TextStyle(fontSize: 16)),
+                      //       ),
+                      //     ),
+                      //   ],
+                      // ),
                     ],
                   ),
                 ),

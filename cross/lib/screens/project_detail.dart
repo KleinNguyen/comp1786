@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_database/firebase_database.dart';
 import '../widgets/expense_item.dart';
 import 'add_expense.dart';
+import 'expense_detail.dart';
 import '../models/project.dart';
 
 class ProjectDetailScreen extends StatelessWidget {
@@ -81,7 +83,7 @@ class ProjectDetailScreen extends StatelessWidget {
           children: [
             _buildInfoRow("Project Name:", project.projectName),
             const Divider(height: 24),
-            _buildInfoRow("Project Code:", "Code: ${project.projectCode}"),
+            _buildInfoRow("Project Code:", project.projectCode),
             const Divider(height: 24),
             _buildInfoRow("Owner:", project.projectOwner),
             const Divider(height: 24),
@@ -114,7 +116,7 @@ class ProjectDetailScreen extends StatelessWidget {
             Text(project.specialRequirement.isEmpty ? "None" : project.specialRequirement, style: const TextStyle(fontSize: 16)),
             const Divider(height: 24),
             _buildSectionHeader("Department Information"),
-            Text(project.departmentInformation.isEmpty ? "N/A" : project.departmentInformation, style: const TextStyle(fontSize: 16)),
+            Text(project.departmentInformation.isEmpty ? "None" : project.departmentInformation, style: const TextStyle(fontSize: 16)),
           ],
         ),
       ),
@@ -122,6 +124,8 @@ class ProjectDetailScreen extends StatelessWidget {
   }
 
   Widget _buildExpensesCard(BuildContext context) {
+    final databaseRef = FirebaseDatabase.instance.ref().child('projects/${project.id}/expenses');
+
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -144,7 +148,7 @@ class ProjectDetailScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const AddExpenseScreen(),
+                        builder: (context) => AddExpenseScreen(projectId: project.id),
                       ),
                     );
                   },
@@ -159,9 +163,54 @@ class ProjectDetailScreen extends StatelessWidget {
             ),
           ),
           Container(
-            height: 250,
+            height: 300,
             padding: const EdgeInsets.all(8),
-            child: const Center(child: Text("No expenses recorded")),
+            child: StreamBuilder(
+              stream: databaseRef.onValue,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (snapshot.hasData && snapshot.data!.snapshot.value != null) {
+                  final dynamic data = snapshot.data!.snapshot.value;
+                  List<dynamic> expenseList = [];
+
+                  if (data is List) {
+                    expenseList = data.where((e) => e != null).toList();
+                  } else if (data is Map) {
+                    expenseList = data.values.toList();
+                  }
+
+                  return ListView.builder(
+                    padding: EdgeInsets.zero,
+                    itemCount: expenseList.length,
+                    itemBuilder: (context, index) {
+                      final item = Map<String, dynamic>.from(expenseList[index]);
+                      return InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ExpenseDetailScreen(expenseData: item),
+                            ),
+                          );
+                        },
+                        child: ExpenseItem(
+                          id: item['expenseCode']?.toString() ?? "N/A",
+                          date: item['date'] ?? "",
+                          claimant: item['claimant'] ?? "",
+                          type: item['type'] ?? "",
+                          amount: "\$${item['amount']?.toString() ?? "0"}",
+                        ),
+                      );
+                    },
+                  );
+                }
+
+                return const Center(child: Text("No expenses recorded"));
+              },
+            ),
           ),
         ],
       ),

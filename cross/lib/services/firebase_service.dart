@@ -25,4 +25,12 @@ class FirebaseService {
       return projects;
     });
   }
+
+  Future<void> addProject(Project project) async {
+    await _dbRef.child('projects').push().set(project.toMap());
+  }
+
+  Future<void> addExpense(String projectId, Map<String, dynamic> expenseData) async {
+    await _dbRef.child('projects/$projectId/expenses').push().set(expenseData);
+  }
 }

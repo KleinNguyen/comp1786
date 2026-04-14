@@ -15,6 +15,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   late TabController _tabController;
   final FirebaseService _service = FirebaseService();
 
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = "";
+
   @override
   void initState() {
     super.initState();
@@ -28,6 +31,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   @override
   void dispose() {
     _tabController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -54,8 +58,14 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           Padding(
             padding: const EdgeInsets.all(12.0),
             child: TextField(
+              controller: _searchController,
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value.toLowerCase();
+                });
+              },
               decoration: InputDecoration(
-                hintText: "Search here...",
+                hintText: "Search project name...",
                 prefixIcon: const Icon(Icons.search),
                 filled: true,
                 fillColor: Colors.grey[200],
@@ -64,6 +74,14 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   borderSide: BorderSide.none,
                 ),
                 contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      _searchController.clear();
+                      setState(() { _searchQuery = ""; });
+                    })
+                    : null,
               ),
             ),
           ),
@@ -94,14 +112,24 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   return const Center(child: Text("No projects found."));
                 }
 
-                List<Project> filteredProjects = snapshot.data!;
+                List<Project> filteredProjects = snapshot.data!.where((project) {
 
-                if (_tabController.index == 1) {
-                  filteredProjects = filteredProjects.where((p) => p.projectStatus.toLowerCase() == "active").toList();
-                } else if (_tabController.index == 2) {
-                  filteredProjects = filteredProjects.where((p) => p.projectStatus.toLowerCase() == "on hold").toList();
-                } else if (_tabController.index == 3) {
-                  filteredProjects = filteredProjects.where((p) => p.projectStatus.toLowerCase() == "completed").toList();
+                  bool matchesSearch = project.projectName.toLowerCase().contains(_searchQuery);
+
+                  bool matchesTab = true;
+                  if (_tabController.index == 1) {
+                    matchesTab = project.projectStatus.toLowerCase() == "active";
+                  } else if (_tabController.index == 2) {
+                    matchesTab = project.projectStatus.toLowerCase() == "on hold";
+                  } else if (_tabController.index == 3) {
+                    matchesTab = project.projectStatus.toLowerCase() == "completed";
+                  }
+
+                  return matchesSearch && matchesTab;
+                }).toList();
+
+                if (filteredProjects.isEmpty) {
+                  return const Center(child: Text("No projects matches your search."));
                 }
 
                 return ListView.builder(

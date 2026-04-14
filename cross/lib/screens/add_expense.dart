@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
+import '../services/firebase_service.dart';
 
 class AddExpenseScreen extends StatefulWidget {
-  const AddExpenseScreen({super.key});
+  final String projectId;
+
+  const AddExpenseScreen({super.key, required this.projectId});
 
   @override
   State<AddExpenseScreen> createState() => _AddExpenseScreenState();
 }
 
 class _AddExpenseScreenState extends State<AddExpenseScreen> {
+  final FirebaseService _service = FirebaseService();
+
   final TextEditingController _idController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
@@ -20,9 +25,73 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   String? _selectedPaymentMethod;
   String? _selectedStatus;
 
-  final List<String> _expenseTypes = ['Travel', 'Food', 'Equipment', 'Other'];
-  final List<String> _paymentMethods = ['Cash', 'Credit Card', 'Bank Transfer'];
-  final List<String> _statusOptions = ['Pending', 'Paid', 'Cancelled'];
+  final List<String> _expenseTypes = [
+    "Travel",
+    "Equipment",
+    "Materials",
+    "Service",
+    "Software/Licenses",
+    "Labour costs",
+    "Utilities",
+    "Miscellaneous"];
+  final List<String> _paymentMethods = [
+    "Cash",
+    "Credit Card",
+    "Bank Transfer",
+    "Cheque"];
+  final List<String> _statusOptions = [
+    "Pending",
+    "Paid",
+    "Reimbursed"];
+
+  Future<void> _handleSave() async {
+    if (_idController.text.trim().isEmpty ||
+        _dateController.text.trim().isEmpty ||
+        _amountController.text.trim().isEmpty ||
+        _currencyController.text.trim().isEmpty ||
+        _claimantController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please fill all required fields (ID, Date, Amount, Currency, Claimant)")),
+      );
+      return;
+    }
+
+    if (_selectedType == null ||
+        _selectedPaymentMethod == null ||
+        _selectedStatus == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please select Type, Payment Method, and Status")),
+      );
+      return;
+    }
+
+    final Map<String, dynamic> expenseData = {
+      "expenseCode": _idController.text.trim(),
+      "id": _idController.text.trim(),
+      "date": _dateController.text.trim(),
+      "amount": double.tryParse(_amountController.text.trim()) ?? 0.0,
+      "currency": _currencyController.text.trim(),
+      "type": _selectedType,
+      "paymentMethod": _selectedPaymentMethod,
+      "claimant": _claimantController.text.trim(),
+      "paymentStatus": _selectedStatus,
+      "location": _locationController.text.trim(),
+      "description": _descriptionController.text.trim(),
+    };
+
+    try {
+      await _service.addExpense(widget.projectId, expenseData);
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: $e")),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,8 +125,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
               ],
             ),
           ),
-
-          // Main Content
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),
@@ -95,30 +162,23 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                       ),
                     ],
                   ),
-
-                  _buildDropdown("Type of Expense", _expenseTypes, (val) => _selectedType = val),
-                  _buildDropdown("Payment Method", _paymentMethods, (val) => _selectedPaymentMethod = val),
-
+                  _buildDropdown("Type of Expense", _expenseTypes, (val) => setState(() => _selectedType = val)),
+                  _buildDropdown("Payment Method", _paymentMethods, (val) => setState(() => _selectedPaymentMethod = val)),
                   _buildTextField("Claimant", _claimantController),
-
-                  _buildDropdown("Payment Status", _statusOptions, (val) => _selectedStatus = val),
-
+                  _buildDropdown("Payment Status", _statusOptions, (val) => setState(() => _selectedStatus = val)),
                   _buildTextField("Location", _locationController),
-
                   _buildTextField(
                       "Description",
                       _descriptionController,
                       maxLines: 3,
                       keyboardType: TextInputType.multiline
                   ),
-
                   const SizedBox(height: 10),
                   SizedBox(
                     width: double.infinity,
                     height: 55,
                     child: ElevatedButton(
-                      onPressed: () {
-                      },
+                      onPressed: _handleSave,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF1976D2),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

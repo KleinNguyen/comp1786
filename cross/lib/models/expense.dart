@@ -1,5 +1,5 @@
 class Expense {
-  String? id;
+  final String id;
   String? projectId;
   String expenseCode;
   String date;
@@ -13,7 +13,7 @@ class Expense {
   String location;
 
   Expense({
-    this.id,
+    required this.id,
     this.projectId,
     required this.expenseCode,
     required this.date,
@@ -30,7 +30,7 @@ class Expense {
   factory Expense.fromMap(String id, Map<String, dynamic> map) {
     return Expense(
       id: id,
-      projectId: map['projectId'] as String?,
+      projectId: map['projectId']?.toString(),
       expenseCode: map['expenseCode'] ?? '',
       date: map['date'] ?? '',
       amount: (map['amount'] ?? 0.0).toDouble(),

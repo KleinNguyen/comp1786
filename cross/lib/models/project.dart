@@ -1,7 +1,7 @@
 import 'expense.dart';
 
 class Project {
-  String? id;
+  final String id;
   String projectCode;
   String projectName;
   String projectDescription;
@@ -12,10 +12,10 @@ class Project {
   double projectBudget;
   String specialRequirement;
   String departmentInformation;
-  List<Expense>? expenses;
+  List<Expense> expenses;
 
   Project({
-    this.id,
+    required this.id,
     required this.projectCode,
     required this.projectName,
     required this.projectDescription,
@@ -26,10 +26,27 @@ class Project {
     required this.projectBudget,
     required this.specialRequirement,
     required this.departmentInformation,
-    this.expenses,
+    this.expenses = const [],
   });
 
   factory Project.fromMap(String id, Map<String, dynamic> map) {
+    var expenseData = map['expenses'];
+    List<Expense> list = [];
+
+    if (expenseData != null) {
+      if (expenseData is Map) {
+        expenseData.forEach((key, value) {
+          list.add(Expense.fromMap(key, Map<String, dynamic>.from(value)));
+        });
+      } else if (expenseData is List) {
+        for (var i = 0; i < expenseData.length; i++) {
+          if (expenseData[i] != null) {
+            list.add(Expense.fromMap(i.toString(), Map<String, dynamic>.from(expenseData[i])));
+          }
+        }
+      }
+    }
+
     return Project(
       id: id,
       projectCode: map['projectCode'] ?? '',
@@ -42,7 +59,7 @@ class Project {
       projectBudget: (map['projectBudget'] ?? 0.0).toDouble(),
       specialRequirement: map['specialRequirement'] ?? '',
       departmentInformation: map['departmentInformation'] ?? '',
-      expenses: [],
+      expenses: list,
     );
   }
 
