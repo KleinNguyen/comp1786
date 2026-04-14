@@ -14,15 +14,15 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final FirebaseService _service = FirebaseService();
-
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = "";
+
+  List<Project>? _allProjects;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
-
+    _tabController = TabController(length: 5, vsync: this);
     _tabController.addListener(() {
       setState(() {});
     });
@@ -87,41 +87,52 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           ),
           TabBar(
             controller: _tabController,
+            isScrollable: false,
+            labelPadding: EdgeInsets.zero,
+            labelStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+            unselectedLabelStyle: const TextStyle(fontSize: 11),
             labelColor: const Color(0xFF1976D2),
             unselectedLabelColor: Colors.grey,
             indicatorColor: const Color(0xFF1976D2),
             indicatorWeight: 4,
             tabs: const [
-              Tab(text: "All Project"),
+              Tab(text: "All"),
+              Tab(text: "Fav"),
               Tab(text: "Active"),
-              Tab(text: "On Hold"),
-              Tab(text: "Completed"),
+              Tab(text: "Hold"),
+              Tab(text: "Done"),
             ],
           ),
           Expanded(
             child: StreamBuilder<List<Project>>(
               stream: _service.getProjects(),
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
+                if (snapshot.connectionState == ConnectionState.waiting && _allProjects == null) {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (snapshot.hasError) {
                   return Center(child: Text("Error: ${snapshot.error}"));
                 }
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+
+                if (snapshot.hasData && _allProjects == null) {
+                  _allProjects = snapshot.data;
+                }
+
+                if (_allProjects == null || _allProjects!.isEmpty) {
                   return const Center(child: Text("No projects found."));
                 }
 
-                List<Project> filteredProjects = snapshot.data!.where((project) {
-
+                List<Project> filteredProjects = _allProjects!.where((project) {
                   bool matchesSearch = project.projectName.toLowerCase().contains(_searchQuery);
-
                   bool matchesTab = true;
+
                   if (_tabController.index == 1) {
-                    matchesTab = project.projectStatus.toLowerCase() == "active";
+                    matchesTab = project.isFavourite;
                   } else if (_tabController.index == 2) {
-                    matchesTab = project.projectStatus.toLowerCase() == "on hold";
+                    matchesTab = project.projectStatus.toLowerCase() == "active";
                   } else if (_tabController.index == 3) {
+                    matchesTab = project.projectStatus.toLowerCase() == "on hold";
+                  } else if (_tabController.index == 4) {
                     matchesTab = project.projectStatus.toLowerCase() == "completed";
                   }
 
@@ -129,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 }).toList();
 
                 if (filteredProjects.isEmpty) {
-                  return const Center(child: Text("No projects matches your search."));
+                  return const Center(child: Text("No projects match."));
                 }
 
                 return ListView.builder(
@@ -153,6 +164,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         owner: "By ${project.projectOwner}",
                         status: project.projectStatus,
                         budget: project.projectBudget,
+                        isFavourite: project.isFavourite,
+                        onFavouritePressed: () {
+                          setState(() {
+                            project.isFavourite = !project.isFavourite;
+                          });
+                        },
                       ),
                     );
                   },

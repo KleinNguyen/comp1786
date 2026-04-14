@@ -13,6 +13,7 @@ class Project {
   String specialRequirement;
   String departmentInformation;
   List<Expense> expenses;
+  bool isFavourite;
 
   Project({
     required this.id,
@@ -27,6 +28,7 @@ class Project {
     required this.specialRequirement,
     required this.departmentInformation,
     this.expenses = const [],
+    this.isFavourite = false,
   });
 
   factory Project.fromMap(dynamic id, Map<dynamic, dynamic> map) {
@@ -60,6 +62,7 @@ class Project {
       specialRequirement: map['specialRequirement'] ?? '',
       departmentInformation: map['departmentInformation'] ?? '',
       expenses: list,
+      isFavourite: map['isFavourite'] ?? false,
     );
   }
 
@@ -77,6 +80,7 @@ class Project {
       'specialRequirement': specialRequirement,
       'departmentInformation': departmentInformation,
       'expenses': expenses.map((e) => e.toMap()).toList(),
+      'isFavourite': isFavourite,
     };
   }
 }

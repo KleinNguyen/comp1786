@@ -7,6 +7,8 @@ class ProjectCard extends StatelessWidget {
   final String owner;
   final String status;
   final double budget;
+  final bool isFavourite;
+  final VoidCallback onFavouritePressed;
 
   const ProjectCard({
     super.key,
@@ -16,6 +18,8 @@ class ProjectCard extends StatelessWidget {
     required this.owner,
     required this.status,
     required this.budget,
+    required this.isFavourite,
+    required this.onFavouritePressed,
   });
 
   Color _getStatusColor(String status) {
@@ -50,6 +54,13 @@ class ProjectCard extends StatelessWidget {
                     name,
                     style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
+                ),
+                IconButton(
+                  icon: Icon(
+                    isFavourite ? Icons.star : Icons.star_border,
+                    color: isFavourite ? Colors.amber : Colors.grey,
+                  ),
+                  onPressed: onFavouritePressed,
                 ),
               ],
             ),
